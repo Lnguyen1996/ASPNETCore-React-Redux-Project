@@ -71,7 +71,7 @@ namespace API.Controllers
 
             if (results) return Ok();
 
-            return BadRequest(new ProblemDetails { Title = "Problem removing item to basket" });
+            return BadRequest(new ProblemDetails { Title = "Problem removing item from basket" });
 
            
         }

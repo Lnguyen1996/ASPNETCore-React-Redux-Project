@@ -33,11 +33,11 @@ axios.interceptors.response.use( async response => {
             }
             //@ts-ignore
 
-            toast.error(error.response.statusText);
+            toast.error(data.title);
             break;
         case 401:
             //@ts-ignore
-            toast.error(error.response.statusText);
+            toast.error(data.title);
             break;
         case 500:
             //@ts-ignore
