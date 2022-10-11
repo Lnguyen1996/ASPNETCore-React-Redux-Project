@@ -1,5 +1,4 @@
 import React, { createContext, PropsWithChildren, useContext, useState } from 'react';
-import PropTypes from 'prop-types';
 import { Basket } from '../models/basket';
 
 interface StoreContextValue{
@@ -25,9 +24,7 @@ export function StoreProvider({children}: PropsWithChildren<any>){
 
     function removeItem(productId:number,quantity:number){
         if(!basket) return;
-
         const items = [...basket.items];
-
         const itemIndex = items.findIndex(i=>i.productId===productId);
         if(itemIndex>=0){
             items[itemIndex].quantity-=quantity;

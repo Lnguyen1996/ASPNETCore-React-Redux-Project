@@ -3,11 +3,13 @@ import ReactDOM from 'react-dom/client';
 import './app/layout/styles.css';
 import App from './app/layout/App';
 import reportWebVitals from './reportWebVitals';
-import { BrowserRouter, Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { createBrowserHistory } from "history";
-import { StoreProvider } from './app/context/StoreContext';
+import { Provider } from 'react-redux';
+import { store } from './app/store/configureStore';
 
 export const customHistory = createBrowserHistory();
+
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -15,9 +17,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <Router history={customHistory}>
     <React.StrictMode>
-      <StoreProvider>
-        <App />
-      </StoreProvider>
+        <Provider store={store} >
+          <App />
+        </Provider>
     </React.StrictMode>
   </Router>
 

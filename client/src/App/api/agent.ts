@@ -1,5 +1,4 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { resolve } from "path";
 import { toast } from "react-toastify";
 import { customHistory } from "../..";
 
