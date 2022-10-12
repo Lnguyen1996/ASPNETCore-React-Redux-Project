@@ -13,11 +13,24 @@ interface CatalogState{
 }
 const productsAdapter = createEntityAdapter<Product>();
 
-export const fetchProductsAsync = createAsyncThunk<Product[]>(
+function getAxiosParams(productParams:ProductParams){
+    const params = new URLSearchParams();
+    params.append('pageNumber',productParams.pageNumber.toString());
+    params.append('pageSize',productParams.pageSize.toString());
+    params.append('orderBy', productParams.orderBy);
+    if (productParams.searchTerm) params.append('searchTerm', productParams.searchTerm);
+    if (productParams.brands) params.append('brands', productParams.brands.toString());
+    if (productParams.types) params.append('types', productParams.types.toString());
+
+    return params;
+}
+
+export const fetchProductsAsync = createAsyncThunk<Product[],void, {state:RootState}>(
     'catalog/fetchProductsAsync',
     async (_, thunkAPI) => {
+        const params = getAxiosParams(thunkAPI.getState().catalog.productParams)
         try {
-            return await agent.Catalog.list();
+            return await agent.Catalog.list(params);
         }
         catch (error: any) {
             return thunkAPI.rejectWithValue({ error: error.data });
@@ -48,9 +61,11 @@ export const fetchFilters = createAsyncThunk(
     }
 )
 function initParams(){
-    return {pageNumber:1,
+    return {
+    pageNumber:1,
     pageSize:6,
-    orderBy:'name'}
+    orderBy:'name'
+}
 }
 export const catalogSlice = createSlice({
     name: 'catalog',
@@ -65,7 +80,7 @@ export const catalogSlice = createSlice({
     reducers: {
         setProductParams:(state,action)=>{
             state.productsLoaded=false;
-            state.productParams={...state,...action.payload};
+            state.productParams={...state.productParams,...action.payload};
         },
         resetProductParams:(state) =>{
             state.productParams = initParams();
@@ -81,7 +96,6 @@ export const catalogSlice = createSlice({
             state.productsLoaded = true;
         });
         builder.addCase(fetchProductsAsync.rejected, (state, action) => {
-            console.log(action.payload)
             state.status = 'idle';
         });
 
