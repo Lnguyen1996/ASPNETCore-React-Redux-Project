@@ -1,12 +1,18 @@
 using API.Data;
+using API.Entities;
 using API.Middleware;
+using API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 namespace API
 {
@@ -28,18 +34,42 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIv5", Version = "v1" });
             });
-            services.AddDbContext<StoreContext>(opt=> 
+            services.AddDbContext<StoreContext>(opt =>
             {
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddCors();
+            services.AddIdentityCore<User>(opt =>
+            {
+                opt.User.RequireUniqueEmail = true;
+            })
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<StoreContext>();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWTSettings:TokenKey"]))
+                    };
+                });
+
+
+            services.AddAuthorization();
+
+            services.AddScoped<TokenService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseMiddleware<ExceptionMiddleware>();
-            
+
             if (env.IsDevelopment())
             {
                 //app.UseDeveloperExceptionPage();
@@ -51,9 +81,12 @@ namespace API
 
             app.UseRouting();
 
-            app.UseCors(opt=>{
+            app.UseCors(opt =>
+            {
                 opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000").AllowCredentials();
             });
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
