@@ -21,6 +21,7 @@ import { ToastContainer } from "react-toastify";
 import { fetchCurrentUser } from "../../features/account/accountSlice";
 import LoadingComponent from "./LoadingComponent";
 import PrivateRoute from "./PrivateRoute";
+import Orders from "../../features/orders/Orders";
 
 function App() {
 
@@ -71,6 +72,7 @@ function App() {
         <Route path={'/server-error'} component={ServerError}/>
         <Route path={'/basket'} component={BasketPage}/>
         <PrivateRoute path={'/checkout'} component={CheckoutPage}/>
+        <PrivateRoute path={'/orders'} component={Orders}/>
         <Route path={'/login'} component={Login}/>
         <Route path={'/register'} component={Register}/>
         <Route component={NotFound}/>
