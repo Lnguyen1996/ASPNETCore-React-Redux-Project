@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -103,11 +104,46 @@ namespace API.Controllers
                 user.Address=address;
             }
 
+            FixupEntities(_context);
             var results = await _context.SaveChangesAsync()>0;
 
             if(results) return CreatedAtRoute("GetOrder",new {id = order.Id},order.Id);
 
             return BadRequest("Problem creating order");
+        }
+        public void FixupEntities(DbContext context)
+        {
+            var dateProperties = context.Model.GetEntityTypes()
+                .SelectMany(t => t.GetProperties())
+                .Where(p => p.ClrType == typeof(DateTime))
+                .Select(z => new
+                {
+                    ParentName = z.DeclaringEntityType.Name,
+                    PropertyName = z.Name
+                });
+
+            var editedEntitiesInTheDbContextGraph = context.ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
+                .Select(x => x.Entity);
+
+            foreach (var entity in editedEntitiesInTheDbContextGraph)
+            {
+                var entityFields = dateProperties.Where(d => d.ParentName == entity.GetType().FullName);
+
+                foreach (var property in entityFields)
+                {
+                    var prop = entity.GetType().GetProperty(property.PropertyName);
+
+                    if (prop == null)
+                        continue;
+
+                    var originalValue = prop.GetValue(entity) as DateTime?;
+                    if (originalValue == null)
+                        continue;
+
+                    prop.SetValue(entity, DateTime.SpecifyKind(originalValue.Value, DateTimeKind.Utc));
+                }
+            }
         }
     }
 }
