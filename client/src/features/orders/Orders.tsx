@@ -21,7 +21,7 @@ export default function Orders() {
     if(loading) return <LoadingComponent message='Leading orders...'/>
 
     if(selectedOrderNumber>0) return (
-        <OrderDetailed order={orders?.find(i=>i.id==selectedOrderNumber)!}
+        <OrderDetailed order={orders?.find(i=>i.id===selectedOrderNumber)!}
         setSelectedOrder={setSelectedOrderNumber}/>
     )
     return (

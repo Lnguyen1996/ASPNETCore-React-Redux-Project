@@ -102,12 +102,16 @@ const Orders = {
     fetch:(id:number)=>requests.get(`orders/${id}`),
     create:(values:any)=>requests.post('orders',values)
 }
+const Payments = {
+    createPaymentIntent: () => requests.post('payments',{})
+}
 const agent = {
     Catalog,
     TestErrors,
     Basket,
     Account,
-    Orders
+    Orders,
+    Payments
 }
 
 export default agent;
